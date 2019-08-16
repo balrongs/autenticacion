@@ -1,0 +1,13 @@
+# package directories
+node_modules
+
+# Babel output
+dist
+
+# Documentation output
+docs/api.html
+docs/assets
+
+# local storage files
+.DS_Store
+.vscode

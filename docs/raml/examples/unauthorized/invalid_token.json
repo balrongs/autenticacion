@@ -1,0 +1,5 @@
+{
+  "error": "invalid_token",
+  "error_description": "The access token is expired, revoked, malformed, or invalid for other reasons.",
+  "error_uri": "See the full API docs at https://authorization-server.com/docs/access_token"
+}

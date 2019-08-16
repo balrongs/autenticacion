@@ -1,0 +1,9 @@
+#%RAML 1.0 DataType
+types:
+  User: !include raml/types/user.raml
+type: object
+properties:
+  total: integer
+  page: integer
+  per_page: integer
+  data: User[]

@@ -1,0 +1,376 @@
+#%RAML 1.0
+title: Auth API service
+version: v1
+protocols: [HTTP, HTTPS]
+mediaType: application/json
+baseUri: https://api.domain.com/{version}
+securitySchemes:
+  oauth_2_0: !include raml/schemes/oauth_2_0.raml
+types:
+  Token: !include raml/types/token.raml
+  Revoke: !include raml/types/revoke.raml
+  User: !include raml/types/user.raml
+  Avatar: !include raml/types/avatar.raml
+  Password: !include raml/types/password.raml
+  PasswordToken: !include raml/types/password_token.raml
+  EmailToken: !include raml/types/email_token.raml
+  UserCollection: !include raml/types/user.collection.raml
+  Error: !include raml/types/error.raml
+traits:
+  secured:
+    headers:
+      Authorization:
+        type: string
+        description: A valid bearer access token.
+    responses:
+      401:
+        body:
+          application/json:
+            type: Error
+            example: !include raml/examples/unauthorized/invalid_token.json
+  paged:
+    queryParameters:
+      limit?:
+        type: integer
+        default: 50
+        description: The data amount that will be displayed when request a paged resource collection.
+      page?:
+        type: integer
+        default: 1
+        description: The page of data collection that will be displayed.
+  orderable:
+    queryParameters:
+      order?:
+        type: string
+        default: 'alphabetic'
+        enum: ['alphabetic','latest']
+        description: The order that the resources of a collection will be displayed.
+  authorizable:
+    responses:
+      403:
+        body:
+          application/json:
+            type: Error
+            example: !include raml/examples/forbidden/default.json
+
+/oauth/token:
+  displayName: "[A01] Access token issuer"
+  post:
+    description: "Request an access token"
+    body:
+      application/json: !include raml/requests/token.raml
+    responses:
+      201:
+        body:
+          application/json:
+            type: Token
+            example: !include raml/examples/access_token.json
+      400:
+        body:
+          application/json:
+            type: Error
+            example: !include raml/examples/bad_request/grant_type.json
+      401:
+        body:
+          application/json:
+            type: Error
+            example: !include raml/examples/unauthorized/invalid_client.json
+/oauth/tokens:
+  displayName: "[A02] Access token repository"
+  /revoke:
+    delete:
+      description: Revoke all access tokens and their refresh tokens of a specific user.
+      securedBy: [oauth_2_0]
+      is: [authorizable, secured]
+      body:
+        application/json: !include raml/requests/revoke.raml
+      responses:
+        200:
+          body:
+            application/json:
+              type: Revoke
+              example: !include raml/examples/revoked.json
+        400:
+          body:
+            application/json:
+              type: Error
+              example: !include raml/examples/bad_request/invalid_user.json
+        404:
+          body:
+            application/json:
+              type: Error
+              example: !include raml/examples/not_found/user.json
+  /{jti}:
+    uriParameters:
+      jti:
+        type: string
+        description: unique identifier for a token.
+    delete:
+      description: Revoke a specific access token and their refresh tokens.
+      securedBy: [oauth_2_0]
+      is: [secured, authorizable]
+      responses:
+        200:
+          body:
+            application/json:
+              type: Revoke
+              example: !include raml/examples/revokedone.json
+        404:
+          body:
+            application/json:
+              type: Error
+              example: !include raml/examples/not_found/token.json
+/register:
+  displayName: "[U01] User register"
+  post:
+    description: "Register a new user. Require an access token with `users:c` scope from [A01]."
+    securedBy: [oauth_2_0]
+    is: [authorizable, secured]
+    body:
+      application/json: !include raml/requests/register.raml
+    responses:
+      201:
+        body:
+          application/json:
+            type: User
+            example: !include raml/examples/user.json
+      400:
+        body:
+          application/json:
+            type: Error
+            example: !include raml/examples/bad_request/email.json
+
+/users:
+  displayName: "[U02] User repository"
+  get:
+    description: List the active users. Require read (`user:r`) scope.
+    securedBy: [oauth_2_0]
+    is: [secured, authorizable, paged, orderable]
+    queryParameters:
+      trashed?:
+        type: string
+        description: if `true` display only deleted users.
+        enum: [true, false]
+    responses:
+      200:
+        body:
+          application/json:
+            type: UserCollection
+            example: !include raml/examples/user.collection.json
+  /{userId}:
+    uriParameters:
+      userId:
+        type: string
+        description: unique identifier for an user. Require read (`user:r`) scope.
+    get:
+      description: Get the specified user data with scopes
+      securedBy: [oauth_2_0]
+      is: [secured, authorizable]
+      responses:
+        200:
+          body:
+            application/json:
+              type: User
+              example: !include raml/examples/user.json
+        404:
+          body:
+            application/json:
+              type: Error
+              example: !include raml/examples/not_found/user.json
+    delete:
+      description: Delete an specific user. Response the user with status `deleted`
+      securedBy: [oauth_2_0]
+      is: [secured, authorizable]
+      responses:
+        200:
+          body:
+            application/json:
+              type: User
+              example: !include raml/examples/deleted.json
+        400:
+          body:
+            application/json:
+              type: Error
+              example: !include raml/examples/bad_request/invalid_date.json
+        404:
+          body:
+            application/json:
+              type: Error
+              example: !include raml/examples/not_found/user.json
+    /restore:
+      post:
+        description: restore a deleted user
+        securedBy: [oauth_2_0]
+        is: [secured, authorizable]
+        responses:
+          200:
+            body:
+              application/json:
+                type: User
+                example: !include raml/examples/user.json
+          404:
+            body:
+              application/json:
+                type: Error
+                example: !include raml/examples/not_found/user.json
+
+/account/profile:
+  displayName: "[U03] User profile"
+  get:
+    description: Data of authenticated user.
+    securedBy: [oauth_2_0]
+    is: [secured]
+    responses:
+      200:
+        body:
+          application/json:
+            type: User
+            example: !include raml/examples/user.json
+  patch:
+    description: Update the authenticated user data. Send only data that changes.
+    securedBy: [oauth_2_0]
+    is: [secured]
+    body:
+      application/json: !include raml/requests/user.update.raml
+    responses:
+      200:
+       body:
+          application/json:
+            type: User
+            example: !include raml/examples/user.json
+      400:
+        body:
+          application/json:
+            type: Error
+            example: !include raml/examples/bad_request/email.json
+
+/account/password:
+  displayName: "[U04] User password"
+  post:
+    description: Update user password. Require old password.
+    securedBy: [oauth_2_0]
+    is: [secured]
+    body:
+      application/json: !include raml/requests/password.update.raml
+    responses:
+      200:
+        body:
+          application/json:
+            type: Password
+            example: !include raml/examples/password_reset.json
+      400:
+        body:
+          application/json:
+            type: Error
+            example: !include raml/examples/bad_request/password_update.json
+
+/account/avatar:
+  displayName: "[U04] Avatar"
+  post:
+    description: Update user avatar
+    securedBy: [oauth_2_0]
+    is: [secured, authorizable]
+    body:
+      multipart/form-data: !include raml/requests/avatar.raml
+    responses:
+      200:
+        body:
+          application/json:
+            type: Avatar
+            example: !include raml/examples/avatar.json
+      400:
+        body:
+          application/json:
+            type: Error
+            example: !include raml/examples/bad_request/avatar.json
+
+/password:
+  displayName: "[U06] User password repository"
+  /forgot:
+    post:
+      description: request a password reset token
+      body:
+        application/json: !include raml/requests/password.token.raml
+      responses:
+        201:
+          body:
+            application/json:
+              type: PasswordToken
+              example: !include raml/examples/password_token.json
+        400:
+          body:
+            application/json:
+              type: Error
+  /reset:
+    post:
+      description: update user password. Require a valid password token.
+      is: [authorizable]
+      body:
+        application/json: !include raml/requests/password.reset.raml
+      responses:
+        200:
+          body:
+            application/json:
+              type: Password
+              example: !include raml/examples/password_reset.json
+        400:
+          body:
+            application/json:
+              type: Error
+              example: !include raml/examples/bad_request/password.json
+        401:
+          body:
+            application/json:
+              type: Error
+              example: !include raml/examples/unauthorized/password.json
+
+/email:
+  displayName: "[U07] Email"
+  /confirm:
+    post:
+      description: request an email verify token
+      securedBy: [oauth_2_0]
+      is: [secured]
+      responses:
+        201:
+          body:
+            application/json:
+              type: EmailToken
+              example: !include raml/examples/email_token.json
+  /verify:
+    post:
+      description: send email to user with validation link
+      securedBy: [oauth_2_0]
+      is: [authorizable]
+      body:
+        application/json: !include raml/requests/email_token.raml
+      responses:
+        200:
+          body:
+            application/json:
+              type: User
+              example: !include raml/examples/user_validated.json
+
+/is_healthy:
+  displayName: "[A00] Service Status"
+  get:
+    description: Display service status
+    securedBy: [oauth_2_0]
+    is: [secured]
+    responses:
+      200:
+        body:
+          application/json:
+            type: object
+            properties:
+              status: string
+            example:
+              status: "ok"
+      503:
+        body:
+          application/json:
+            type: object
+            properties:
+              status: string
+            example:
+              status: "offline"

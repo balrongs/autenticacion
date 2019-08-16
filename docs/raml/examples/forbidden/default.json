@@ -1,0 +1,5 @@
+{
+  "error": "forbidden",
+  "error_description": "You do not have permission to access this resource.",
+  "error_uri": "See the full API docs at https://authorization-server.com/docs"
+}

@@ -1,0 +1,13 @@
+#%RAML 1.0 DataType
+description: |
+    Auth service supports OAuth 2.0 for authenticating  API requests on protected routes.
+  type: OAuth 2.0
+  describedBy:
+    headers:
+      Authorization:
+        description: |
+            Used to send a valid OAuth 2 access token. Do not use
+            with the "access_token" query string parameter.
+        type: string
+settings:
+authorizationGrants: [ client_credentials ]

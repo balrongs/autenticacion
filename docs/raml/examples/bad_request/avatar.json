@@ -1,0 +1,5 @@
+{
+  "error": "invalid_request",
+  "error_description": "The `avatar` file must be an image",
+  "error_uri": "See the full API docs at https://authorization-server.com/docs/register"
+}

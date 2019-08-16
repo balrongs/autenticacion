@@ -1,0 +1,13 @@
+version: '3.1'
+
+services:
+
+  db:
+    container_name: auth-db
+    build: .
+    environment:
+      POSTGRES_USER: auth-dev
+      POSTGRES_PASSWORD: EGtZkXXY
+      POSTGRES_DB: auth-db
+    ports:
+      - '5555:5432'

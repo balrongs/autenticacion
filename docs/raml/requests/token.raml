@@ -1,0 +1,39 @@
+#%RAML 1.0 DataType
+type: object
+properties:
+  grant_type:
+    type: string
+    enum: ["password", "refresh_token", "client_credentials"]
+    description: Authentication type. Must be `password`, `refresh_token` or `client_credentials`.
+  username?:
+    type: string
+    description: The user’s username. Required if `grant_type` is `password`.
+  password?:
+    type: string
+    description: The user’s password. Required if `grant_type` is `password`.
+  refresh?:
+    type: string
+    description: Use to obtain new access token with a refresh token. Required if `grant_type` is `refresh_token`.
+  client_id:
+    type: string
+    description: The application’s client ID.
+  client_secret:
+    type: string
+    description: The application’s client secret. This ensures that the request to get the access token is made only from the application, and not from a potential attacker.
+  scopes:
+    type: string
+    description: The client specifies the authorization scopes. Must be separated by spaces.
+examples:
+  -
+    grant_type: "password"
+    username: "user@example.com"
+    password: "secret"
+    client_id: "e7377c48-9911-4341-82df-caa58b021c99"
+    client_secret: "Y5MsLoeyzsTYLTEYhedmCXHnWJl83PIc43PPyUal"
+    scopes: "regions:r files:crud users:r"
+  -
+    grant_type: "refresh_token"
+    refresh: "def502002629ef7bcd34e24b083413931a3f7acf..."
+    client_id: "e7377c48-9911-4341-82df-caa58b021c99"
+    client_secret: "Y5MsLoeyzsTYLTEYhedmCXHnWJl83PIc43PPyUal"
+    scopes: "regions:r files:crud users:r"

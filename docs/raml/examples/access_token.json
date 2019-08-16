@@ -1,0 +1,7 @@
+{
+  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjQ4NmFjZThl...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "def502002629ef7bcd34e24b083413931a3f7acffc53b120a611ac7...",
+  "scopes": "regions:r files:crud"
+}
