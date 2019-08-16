@@ -16,11 +16,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@bitbucket.org/jumpitt_software_factory/auth.git"
+    "url": "git+ssh://https://github.com/balrongs/autenticacion"
   },
-  "author": "Jumpitt Labs - jfuentes@jumpitt.com",
+  "author": "Jumpitt Labs",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/jumpitt_software_factory/auth#readme",
+  "homepage": "https://github.com/balrongs/autenticacion#readme",
   "dependencies": {
     "@koa/cors": "^2.2.3",
     "aws-sdk": "^2.437.0",
