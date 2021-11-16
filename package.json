@@ -23,7 +23,7 @@
   "homepage": "https://github.com/balrongs/autenticacion#readme",
   "dependencies": {
     "@koa/cors": "^2.2.3",
-    "aws-sdk": "^2.437.0",
+    "aws-sdk": "^2.814.0",
     "bcrypt": "^3.0.4",
     "fastest-validator": "^0.6.13",
     "jsonwebtoken": "^8.4.0",
